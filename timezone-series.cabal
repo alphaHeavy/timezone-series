@@ -59,6 +59,7 @@ Library
   Build-depends:       base >= 3.0 && < 5,
                        time >= 1.1.4 && < 1.5
   
+  GHC-options: -auto-all 
   -- Modules not exported by this package.
   -- Other-modules:       
   

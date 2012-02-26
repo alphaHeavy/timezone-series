@@ -29,6 +29,7 @@ module Data.Time.LocalTime.TimeZone.Series
   -- $aboutfuncs
   utcToLocalTime',
   localTimeToUTC',
+  localTimeToUTCFast,
 
   -- * Representing a moment in a timezone
   ZoneSeriesTime(..),
@@ -43,8 +44,8 @@ import Data.Time (UTCTime, LocalTime, TimeZone(timeZoneSummerOnly),
                   ZonedTime(ZonedTime),
                   ParseTime(buildTime), FormatTime(formatCharacter),
                   utcToLocalTime, localTimeToUTC)
-import Data.List (partition)
-import Data.Maybe (listToMaybe, fromMaybe)
+import Data.List (find, partition)
+import Data.Maybe (listToMaybe, fromMaybe,fromJust)
 import Data.Typeable (mkTyCon, mkTyConApp, Typeable(typeOf))
 import Control.Arrow (first)
 
@@ -248,3 +249,10 @@ localTimeToUTC' (TimeZoneSeries dfault changes) lt =
   fromMaybe (localTimeToUTC dfault lt) . fmap snd . listToMaybe .
   dropWhile (uncurry (>)) $
   zip (map fst changes) (map (flip localTimeToUTC lt . snd) changes)
+
+localTimeToUTCFast :: TimeZoneSeries -> LocalTime -> UTCTime
+localTimeToUTCFast (TimeZoneSeries dfault changes) lt =
+  let con = localTimeToUTC dfault lt
+      tzc = snd $ fromJust $ find (\ (start,tz) -> con < start) changes
+   in localTimeToUTC tzc lt
+
